@@ -1,0 +1,128 @@
+/* Custom CSS for Task Management System */
+
+/* General styles */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.sidebar {
+    min-height: 100vh;
+}
+
+/* Status badge styles */
+.badge-pending {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.badge-in_progress {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.badge-done {
+    background-color: #198754;
+    color: white;
+}
+
+/* Table improvements */
+.table {
+    vertical-align: middle;
+}
+
+/* Login container centering */
+#login-container {
+    display: flex;
+    min-height: 100vh;
+    align-items: center;
+}
+
+/* Form validation */
+.is-invalid {
+    border-color: #dc3545 !important;
+}
+
+.invalid-feedback {
+    display: block;
+    color: #dc3545;
+}
+
+/* Dashboard stats cards */
+.card .card-body {
+    padding: 1.5rem;
+}
+
+.card .card-title {
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+}
+
+.card .card-text {
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+/* Button hover effects */
+.btn-primary {
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Task description truncation in tables */
+.task-description {
+    max-width: 250px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Task due date highlighting */
+.due-date-warning {
+    color: #ffc107;
+    font-weight: bold;
+}
+
+.due-date-danger {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+/* User status indicator */
+.user-status-active {
+    color: #198754;
+}
+
+.user-status-inactive {
+    color: #dc3545;
+}
+
+/* Action buttons in tables */
+.action-btn {
+    margin-right: 5px;
+}
+
+/* Pagination styling */
+.pagination {
+    margin-bottom: 0;
+}
+
+/* Modal improvements */
+.modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+/* Loading indicator */
+.loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+}
+
+/* //public/frontend/css/styles.css */
