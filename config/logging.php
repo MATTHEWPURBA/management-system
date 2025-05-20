@@ -152,6 +152,14 @@ return [
             'days' => 14,
             'replace_placeholders' => true,
         ],
+
+
+        'auth_debug' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/auth_debug.log'),
+            'level' => 'debug',
+            'days' => 14,
+        ],
     ],
 
 ];

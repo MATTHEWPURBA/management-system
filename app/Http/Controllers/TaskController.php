@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Task;
+use App\Services\LoggingService;
 use App\Services\TaskService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -119,6 +120,18 @@ class TaskController extends Controller
     public function store(Request $request)
     {
         try {
+
+                    // Start of auth flow logging
+        $traceId = uniqid('task_create_', true);
+        LoggingService::authLog('Starting task creation authorization flow', [
+            'trace_id' => $traceId,
+            'request_data' => $request->except(['password']),
+            'user' => [
+                'id' => $request->user()->id,
+                'role' => $request->user()->role
+            ]
+        ]);
+
             // Validate the request data
             $validator = Validator::make($request->all(), [
                 'title' => 'required|string|max:255',
@@ -128,20 +141,39 @@ class TaskController extends Controller
                 'due_date' => 'required|date|after_or_equal:today',
             ]);
             
-            // Return validation errors if validation fails
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validation Error',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
+        // Return validation errors if validation fails
+        if ($validator->fails()) {
+            LoggingService::authLog('Task creation validation failed', [
+                'trace_id' => $traceId,
+                'errors' => $validator->errors()->toArray()
+            ]);
             
-            // Get the current user
-            $currentUser = $request->user();
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation Error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+        
             
-            // Create the task through the service (handles authorization and business rules)
+        // Get the current user
+        $currentUser = $request->user();
+        LoggingService::authLog('User retrieved for task creation', [
+            'trace_id' => $traceId,
+            'user_id' => $currentUser->id,
+            'user_role' => $currentUser->role
+        ]);
+
+        
+            
+        // Create the task through the service (handles authorization and business rules)
+        try {
             $task = $this->taskService->createTask($currentUser, $validator->validated());
+            
+            LoggingService::authLog('Task created successfully', [
+                'trace_id' => $traceId,
+                'task_id' => $task->id
+            ]);
             
             // Return successful response with created task
             return response()->json([
@@ -150,16 +182,41 @@ class TaskController extends Controller
                 'data' => $task
             ], 201);
         } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            LoggingService::authLog('Task creation authorization failed', [
+                'trace_id' => $traceId,
+                'exception' => [
+                    'message' => $e->getMessage(),
+                    'code' => $e->getCode(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine()
+                ]
+            ]);
+            
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
             ], 403);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'An error occurred while creating the task.',
-                'error' => $e->getMessage()
-            ], 500);
+        }
+
+    } catch (\Exception $e) {
+        LoggingService::authLog('Unexpected error in task creation', [
+            'trace_id' => $traceId ?? uniqid('task_create_', true),
+            'exception' => [
+                'class' => get_class($e),
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]
+        ]);
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'An error occurred while creating the task.',
+            'error' => $e->getMessage()
+        ], 500);
+
+        
         }
     }
 

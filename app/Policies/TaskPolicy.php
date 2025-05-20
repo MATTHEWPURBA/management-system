@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Task;
 use App\Models\User;
+use App\Services\LoggingService;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 /**
@@ -178,20 +179,61 @@ class TaskPolicy
      */
     public function assign(User $user, User $assignee): bool
     {
-        // Admin can assign tasks to anyone
-        if ($user->isAdmin()) {
-            return true;
-        }
-        
-        // Managers can only assign tasks to staff
-        if ($user->isManager()) {
-            return $assignee->isStaff();
-        }
-        
-        // Staff can only assign tasks to themselves
-        if ($user->isStaff()) {
-            return $user->id === $assignee->id;
-        }
+
+
+        $traceId = uniqid('policy_assign_', true);
+    
+        LoggingService::authLog('TaskPolicy::assign called', [
+            'trace_id' => $traceId,
+            'user_id' => $user->id,
+            'user_role' => $user->role,
+            'assignee_id' => $assignee->id,
+            'assignee_role' => $assignee->role,
+            'params_received' => [
+                'param1_type' => gettype($user),
+                'param1_class' => get_class($user),
+                'param2_type' => gettype($assignee),
+                'param2_class' => is_object($assignee) ? get_class($assignee) : 'not_an_object'
+            ]
+        ]);
+
+
+    // Admin can assign tasks to anyone
+    if ($user->isAdmin()) {
+        LoggingService::authLog('Admin permission granted', [
+            'trace_id' => $traceId,
+            'result' => true
+        ]);
+        return true;
+    }
+    
+    // Managers can only assign tasks to staff
+    if ($user->isManager()) {
+        $result = $assignee->isStaff();
+        LoggingService::authLog('Manager permission check', [
+            'trace_id' => $traceId,
+            'assignee_is_staff' => $assignee->isStaff() ? 'true' : 'false',
+            'result' => $result ? 'allowed' : 'denied'
+        ]);
+        return $result;
+    }
+    
+    // Staff can only assign tasks to themselves
+    if ($user->isStaff()) {
+        $result = $user->id === $assignee->id;
+        LoggingService::authLog('Staff permission check', [
+            'trace_id' => $traceId,
+            'ids_match' => ($user->id === $assignee->id) ? 'true' : 'false',
+            'result' => $result ? 'allowed' : 'denied'
+        ]);
+        return $result;
+    }
+    
+    // Default deny for any other scenario
+    LoggingService::authLog('Default deny', [
+        'trace_id' => $traceId,
+        'result' => false
+    ]);
         
         // Default deny for any other scenario
         return false;

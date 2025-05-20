@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Services\ActivityLogService;
+use App\Services\LoggingService;
 use App\Services\TaskService;
 use App\Services\UserService;
 use Illuminate\Support\ServiceProvider;
@@ -22,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(ActivityLogService::class);
         $this->app->singleton(TaskService::class);
         $this->app->singleton(UserService::class);
+            // Register the LoggingService as a singleton
+        $this->app->singleton(LoggingService::class);
     }
 
     /**

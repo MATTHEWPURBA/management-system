@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 
 
@@ -30,4 +31,16 @@ Route::get('{any}', function () {
 })->where('any', '.*');
 
 
+
+Route::get('/test-log', function () {
+    // Test multiple logging channels
+    Log::channel('single')->info('Test single channel');
+    Log::channel('api_activity')->info('Test API activity channel');
+    Log::channel('stack')->info('Test stack channel');
+    
+    // Test default channel
+    Log::info('Test default channel');
+    
+    return "Logging tests written. Check your log files.";
+});
 // routes/web.php

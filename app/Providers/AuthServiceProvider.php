@@ -32,6 +32,28 @@ class AuthServiceProvider extends ServiceProvider
         
         // Define gates for activity logs and other permissions
         
+
+            // Add this explicit Gate definition
+    Gate::define('assign', function (User $user, User $assignee) {
+        // Admin can assign tasks to anyone
+        if ($user->isAdmin()) {
+            return true;
+        }
+        
+        // Managers can only assign tasks to staff
+        if ($user->isManager()) {
+            return $assignee->isStaff();
+        }
+        
+        // Staff can only assign tasks to themselves
+        if ($user->isStaff()) {
+            return $user->id === $assignee->id;
+        }
+        
+        // Default deny
+        return false;
+    });
+
         // Only admin can view logs
         Gate::define('view-logs', function (User $user) {
             return $user->isAdmin();

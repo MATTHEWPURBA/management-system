@@ -8,6 +8,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use App\Services\LoggingService;
+
 
 /**
  * TaskService - Encapsulates business logic for Task management
@@ -100,21 +102,91 @@ class TaskService
      */
     public function createTask(User $currentUser, array $taskData)
     {
+
+        $traceId = uniqid('task_service_', true);
+
+        LoggingService::authLog('TaskService::createTask called', [
+            'trace_id' => $traceId,
+            'user_id' => $currentUser->id,
+            'user_role' => $currentUser->role,
+        ]);
+
         // Verify the assigned user exists
         $assignee = User::find($taskData['assigned_to']);
         if (!$assignee) {
             throw new \Exception('The assigned user does not exist.');
         }
         
-        // Check if the current user is allowed to assign tasks to this user
-        if (!Gate::allows('assign', $assignee)) {
+
+
+
+        
+        // // Check if the current user is allowed to assign tasks to this user
+        // if (!Gate::allows('assign', [$assignee])) {
+        //     throw new \Illuminate\Auth\Access\AuthorizationException(
+        //         'You are not authorized to assign tasks to this user.'
+        //     );
+        // }
+        
+
+
+
+        LoggingService::authLog('Assignee found', [
+            'trace_id' => $traceId,
+            'assignee' => [
+                'id' => $assignee->id,
+                'name' => $assignee->name,
+                'role' => $assignee->role
+            ]
+        ]);
+        
+        // Start detailed Gate debugging
+        LoggingService::authLog('Checking authorization', [
+            'trace_id' => $traceId,
+            'check_type' => 'Gate::allows',
+            'ability' => 'assign',
+            'arguments_type' => gettype($assignee),
+            'arguments_class' => get_class($assignee),
+            'is_array' => is_array($assignee) ? 'true' : 'false',
+            'user_role' => $currentUser->role,
+            'assignee_role' => $assignee->role
+        ]);
+        
+        // Try both ways of calling Gate::allows for debugging purposes
+        $resultDirectParam = Gate::allows('assign', $assignee);
+        $resultArrayParam = Gate::allows('assign', [$assignee]); 
+        
+        LoggingService::authLog('Authorization check results', [
+            'trace_id' => $traceId,
+            'direct_param_result' => $resultDirectParam ? 'allowed' : 'denied',
+            'array_param_result' => $resultArrayParam ? 'allowed' : 'denied'
+        ]);
+        
+        // Use the array parameter approach which is the correct one
+        if (!$resultArrayParam) {
+            LoggingService::authLog('Authorization denied', [
+                'trace_id' => $traceId,
+                'user_id' => $currentUser->id,
+                'user_role' => $currentUser->role,
+                'assignee_id' => $assignee->id,
+                'assignee_role' => $assignee->role
+            ]);
+            
             throw new \Illuminate\Auth\Access\AuthorizationException(
                 'You are not authorized to assign tasks to this user.'
             );
         }
         
+        LoggingService::authLog('Authorization granted', [
+            'trace_id' => $traceId,
+            'user_role' => $currentUser->role,
+            'assignee_role' => $assignee->role
+        ]);
+
+
+
         // Generate a UUID for the new task
-        $taskData['id'] = Str::uuid();
+        $taskData['id'] = \Illuminate\Support\Str::uuid();
         
         // Set the creator to the current user
         $taskData['created_by'] = $currentUser->id;
