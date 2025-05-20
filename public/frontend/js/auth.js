@@ -177,6 +177,12 @@ function updateAuthUI(isAuthenticated) {
         if (currentUser.role === 'admin') {
             adminUsersMenuItem.style.display = 'block';
             adminLogsMenuItem.style.display = 'block';
+            
+            // Show export button for admin only
+            const exportButton = document.getElementById('export-tasks');
+            if (exportButton) {
+                exportButton.style.display = 'inline-block';
+            }
         } else if (currentUser.role === 'manager') {
             adminUsersMenuItem.style.display = 'block';
             adminLogsMenuItem.style.display = 'none';

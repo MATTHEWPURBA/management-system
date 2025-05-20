@@ -34,6 +34,19 @@ function initTasks() {
     tasksLink.addEventListener('click', showTasks);
     newTaskBtn.addEventListener('click', showNewTaskModal);
     saveTaskBtn.addEventListener('click', saveTask);
+
+    // Export button event handler
+    const exportButton = document.getElementById('export-tasks');
+    if (exportButton) {
+        exportButton.addEventListener('click', async () => {
+            try {
+                await TaskAPI.exportTasks();
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('An error occurred while exporting tasks.');
+            }
+        });
+    }
 }
 
 /**

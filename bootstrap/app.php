@@ -20,6 +20,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'check.userstatus' => \App\Http\Middleware\CheckUserStatus::class,
             // Add any other middleware aliases you need here
         ]);
+
+        
         
         // You can keep any other middleware configurations you need
     })

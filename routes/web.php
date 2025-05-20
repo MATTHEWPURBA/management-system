@@ -43,4 +43,7 @@ Route::get('/test-log', function () {
     
     return "Logging tests written. Check your log files.";
 });
+
+
+
 // routes/web.php

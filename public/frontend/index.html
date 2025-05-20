@@ -150,9 +150,19 @@
                 <div id="tasks-container" style="display: none;">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h1>Tasks</h1>
-                        <button class="btn btn-primary" id="new-task-btn">
-                            <i class="bi bi-plus-circle"></i> New Task
-                        </button>
+
+                        <div>
+                 <!-- Export button - Admin only -->
+                 <button class="btn btn-success me-2" id="export-tasks" style="display: none;">
+                    <i class="bi bi-file-arrow-down"></i> Export CSV
+                </button>
+                            
+                            <!-- Existing new task button -->
+                            <button class="btn btn-primary" id="new-task-btn">
+                                <i class="bi bi-plus-circle"></i> New Task
+                            </button>
+                        </div>
+
                     </div>
                     
                     <div class="card">

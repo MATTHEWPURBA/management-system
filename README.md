@@ -96,6 +96,12 @@ A complete RESTful API system for managing users and tasks with role-based acces
    * * * * * cd /path-to-project && php artisan schedule:run >> /dev/null 2>&1
    ```
 
+   Or run it manually by enter this code in your terminal
+
+   ```
+   php artisan tasks:check-overdue
+   ```
+
 ## Default Users
 
 After seeding the database, you can log in with the following credentials:

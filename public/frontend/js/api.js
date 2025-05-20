@@ -192,10 +192,61 @@ const TaskAPI = {
      * Export tasks to CSV (admin only)
      * @returns {Promise} CSV download response
      */
-    exportTasks: () => {
-        window.location.href = `${API_URL}/tasks/export?token=${authToken}`;
-        return Promise.resolve({ status: 200 });
-    },
+    exportTasks: async () => {
+        try {
+            // Show loading indicator if available
+            const exportButton = document.getElementById('export-tasks');
+            if (exportButton) {
+                exportButton.disabled = true;
+                exportButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Exporting...';
+            }
+            
+            // Make authenticated request with proper headers
+            const response = await fetch(`${API_URL}/tasks/export`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                    'Accept': 'text/csv'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            // Create a blob from the response
+            const blob = await response.blob();
+            
+            // Create a download link and trigger the download
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `tasks-export-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            
+            // Clean up
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            return { success: true };
+        } catch (error) {
+            console.error('Error exporting tasks:', error);
+            alert('Failed to export tasks. Please try again.');
+            return { 
+                success: false, 
+                message: 'Failed to export tasks. Please try again.' 
+            };
+        } finally {
+            // Reset button state
+            const exportButton = document.getElementById('export-tasks');
+            if (exportButton) {
+                exportButton.disabled = false;
+                exportButton.innerHTML = '<i class="bi bi-file-arrow-down"></i> Export CSV';
+            }
+        }
+    }
 };
 
 /**
@@ -223,5 +274,3 @@ const LogAPI = {
      */
     getLog: (id) => apiRequest(`/logs/${id}`),
 };
-
-//public/frontend/js/api.js
