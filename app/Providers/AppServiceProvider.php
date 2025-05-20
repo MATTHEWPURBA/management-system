@@ -8,7 +8,8 @@ use App\Services\UserService;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Pagination\Paginator;
-
+use Laravel\Sanctum\PersonalAccessToken;
+use Laravel\Sanctum\Sanctum;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,6 +29,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
+
         // Set default string length for MySQL
         Schema::defaultStringLength(191);
         
